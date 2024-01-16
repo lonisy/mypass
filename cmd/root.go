@@ -60,7 +60,7 @@ func Execute() {
 func init() {
 	initializeDatabase()
 	checkAndSetFirstPasswordKey()
-	fmt.Println(getPasswordKey())
+	//fmt.Println(getPasswordKey())
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -86,6 +86,13 @@ func checkFirstPasswordKey() (bool, string) {
 		return false, ""
 	}
 	password_key := string(passwordBytes)
+
+	// 检查用户是否输入了密码键
+	//fmt.Println("Enter Password", password_key)
+	//if strings.TrimSpace(password_key) == "" {
+	//	fmt.Println("No password key entered.")
+	//	return false, ""
+	//}
 	//fmt.Println("\nPassword you entered is: ", password_key) // 注意：出于安全考虑，实际应用中不应打印密码
 	password_key_db, _ := getPasswordKey()
 	if tools.DefaultDecryptString(password_key_db) != strings.TrimSpace(password_key) {
@@ -173,6 +180,11 @@ func checkAndSetFirstPasswordKey() {
 		}
 		// 去除换行符
 		passwordKey = strings.TrimSpace(passwordKey)
+		// 检查用户是否输入了密码键
+		if strings.TrimSpace(passwordKey) == "" {
+			fmt.Println("No password key entered.")
+			return
+		}
 		passwordKey = tools.DefaultEncryptString(passwordKey)
 		// 获取当前时间作为 created_at 和 updated_at
 		currentTime := time.Now().Format("2006-01-02 15:04:05")
