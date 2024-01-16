@@ -72,13 +72,6 @@ func init() {
 }
 
 func checkFirstPasswordKey() (bool, string) {
-	//fmt.Print("Enter Password Key: ")
-	//passwordBytes, err := term.ReadPassword(0) // 0 通常代表标准输入
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//password_key := string(passwordBytes)
-
 	fmt.Printf("Enter Password Key: ")
 	passwordBytes, err := gopass.GetPasswdMasked() // 显示星号
 	if err != nil {
@@ -87,13 +80,14 @@ func checkFirstPasswordKey() (bool, string) {
 	}
 	password_key := string(passwordBytes)
 
-	// 检查用户是否输入了密码键
+	//检查用户是否输入了密码键
 	//fmt.Println("Enter Password", password_key)
-	//if strings.TrimSpace(password_key) == "" {
-	//	fmt.Println("No password key entered.")
-	//	return false, ""
-	//}
+	if strings.TrimSpace(password_key) == "" {
+		fmt.Println("No password key entered.")
+		return false, ""
+	}
 	//fmt.Println("\nPassword you entered is: ", password_key) // 注意：出于安全考虑，实际应用中不应打印密码
+
 	password_key_db, _ := getPasswordKey()
 	if tools.DefaultDecryptString(password_key_db) != strings.TrimSpace(password_key) {
 		log.Fatal("Password key is not correct!")
@@ -135,9 +129,10 @@ func createTableIfNotExists(tableName, createTableSQL string) {
 			log.Fatal(err)
 		}
 		fmt.Printf("Table %s created\n", tableName)
-	} else {
-		fmt.Printf("Table %s already exists\n", tableName)
 	}
+	//else {
+	//	fmt.Printf("Table %s already exists\n", tableName)
+	//}
 }
 
 // listPasswords retrieves and displays all passwords
@@ -194,9 +189,10 @@ func checkAndSetFirstPasswordKey() {
 			log.Fatal(err)
 		}
 		fmt.Println("Password key set successfully.")
-	} else {
-		fmt.Println("Password key already exists.")
 	}
+	//else {
+	//	fmt.Println("Password key already exists.")
+	//}
 }
 
 func getPasswordKey() (string, error) {
