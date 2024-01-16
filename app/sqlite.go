@@ -41,14 +41,13 @@ func (s *DBStruct) DB() *sql.DB {
 }
 
 func BackupDatabase() {
+	const maxBackups = 15
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Printf("Could not find local user folder. Error: %v\n", err)
 	}
-	const backupDir = "./backups"
-	const maxBackups = 15
+	backupDir := userHomeDir + string(os.PathSeparator) + ".mypass_backups"
 	dbFile := userHomeDir + string(os.PathSeparator) + DataSourceName
-
 	// 创建备份目录（如果不存在）
 	if _, err := os.Stat(backupDir); os.IsNotExist(err) {
 		os.Mkdir(backupDir, os.ModePerm)
