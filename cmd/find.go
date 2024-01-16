@@ -66,7 +66,7 @@ func findPassword() {
 		// fmt.Printf("ID: %d, Account: %s, Password: %s, URL: %s, Email: %s, Note: %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
 	}
 
-	tools.Output(items)
+	tools.GreenOutput(items)
 	if !found {
 		fmt.Println("No matching records found.")
 	}
