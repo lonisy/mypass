@@ -82,7 +82,7 @@ func changePassword() {
 	fmt.Scanln(&newAccount)
 	fmt.Print("Enter new password (leave blank to keep current): ")
 	fmt.Scanln(&newPassword)
-	fmt.Print("Enter new URL/Type (leave blank to keep current): ")
+	fmt.Print("Enter new URL (leave blank to keep current): ")
 	fmt.Scanln(&newURL)
 	fmt.Print("Enter new email (leave blank to keep current): ")
 	fmt.Scanln(&newEmail)

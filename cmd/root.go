@@ -204,10 +204,8 @@ func getPasswordKey() (string, error) {
 	err := app.Sqlite.DB().QueryRow("SELECT key FROM password_keys ORDER BY id ASC LIMIT 1").Scan(&passwordKey)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			// 表中没有记录
 			return "", fmt.Errorf("no password key found")
 		}
-		// 处理其他错误
 		return "", err
 	}
 	return passwordKey, nil
