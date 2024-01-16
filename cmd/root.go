@@ -27,7 +27,7 @@ type PasswordItem struct {
 	URL       string
 	Email     string
 	Note      string
-	UpdatedAt string
+	UpdatedAt string `json:"updated_at"`
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -44,7 +44,14 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		listPasswords()
-
+		//red := color.New(color.FgRed).PrintfFunc()
+		//green := color.New(color.FgGreen).PrintfFunc()
+		//blue := color.New(color.FgBlue).PrintfFunc()
+		//
+		//// 使用颜色打印文本
+		//red("这是红色文本\n")
+		//green("这是绿色文本\n")
+		//blue("这是蓝色文本\n")
 	},
 }
 
@@ -155,7 +162,7 @@ func listPasswords() {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
-	tools.Output(items)
+	tools.GreenOutput(items)
 }
 
 func checkAndSetFirstPasswordKey() {

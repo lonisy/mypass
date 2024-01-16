@@ -7,6 +7,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"log"
 	"mypass/app"
@@ -82,7 +83,8 @@ func deletePassword() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Are you sure you want to delete this password? [y/n]: ")
+	redPrint := color.New(color.FgRed).PrintfFunc()
+	redPrint("Are you sure you want to delete this password? [y/n]: \n")
 	response, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)

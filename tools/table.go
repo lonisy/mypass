@@ -8,6 +8,7 @@ package tools
 import (
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	"reflect"
 )
 
@@ -29,6 +30,11 @@ var m = map[string]bd{
 	"ascii":        {'-', '|', '+', '+', '+', '+', '+', '+', '+', '+', '+'},
 	"box-drawing":  {'═', '│', '╪', '╧', '╤', '╣', '╠', '╗', '╔', '╝', '╚'},
 	"box-drawing2": {'─', '│', '┼', '┴', '┬', '┤', '├', '┐', '┌', '┘', '└'},
+}
+
+func GreenOutput(slice interface{}) {
+	green := color.New(color.FgGreen).PrintfFunc()
+	green(Table(slice) + "\n")
 }
 
 // Output formats slice of structs data and writes to standard output.(Using box drawing characters)

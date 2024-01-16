@@ -48,7 +48,7 @@ func findPassword() {
 	fmt.Scanln(&searchQuery)
 
 	// 从数据库中搜索账号或URL
-	rows, err := app.Sqlite.DB().Query("SELECT id, account, password, url, email, note FROM passwords WHERE account LIKE ? OR url LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%")
+	rows, err := app.Sqlite.DB().Query("SELECT id, account, password, url, email, note, updated_at FROM passwords WHERE account LIKE ? OR url LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,11 +59,11 @@ func findPassword() {
 	for rows.Next() {
 		found = true
 		var item PasswordItem
-		if err := rows.Scan(&item.ID, &item.Account, &item.Password, &item.URL, &item.Email, &item.Note); err != nil {
+		if err := rows.Scan(&item.ID, &item.Account, &item.Password, &item.URL, &item.Email, &item.Note, &item.UpdatedAt); err != nil {
 			log.Fatal(err)
 		}
 		items = append(items, item)
-		//fmt.Printf("ID: %d, Account: %s, Password: %s, URL: %s, Email: %s, Note: %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
+		// fmt.Printf("ID: %d, Account: %s, Password: %s, URL: %s, Email: %s, Note: %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
 	}
 
 	tools.Output(items)
