@@ -30,7 +30,7 @@ func (s *DBStruct) DB() *sql.DB {
 		var err error
 		userHomeDir, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Printf("Could not find local user folder. Error: %v\n", err)
+			Log.Info(fmt.Sprintf("Could not find local user folder. Error: %v\n", err))
 		}
 		s.db, err = sql.Open("sqlite3", userHomeDir+string(os.PathSeparator)+DataSourceName)
 		if err != nil {
@@ -44,7 +44,7 @@ func BackupDatabase() {
 	const maxBackups = 15
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Printf("Could not find local user folder. Error: %v\n", err)
+		Log.Error(fmt.Sprintf("Could not find local user folder. Error: %v\n", err))
 	}
 	backupDir := userHomeDir + string(os.PathSeparator) + ".mypass_backups"
 	dbFile := userHomeDir + string(os.PathSeparator) + DataSourceName
@@ -55,21 +55,20 @@ func BackupDatabase() {
 	// 获取最新备份的 MD5
 	latestBackup, latestMD5, err := getLatestBackupMD5(backupDir)
 	if err != nil {
-		fmt.Println("Error getting latest backup:", err)
+		Log.Error(fmt.Sprintf("Error getting latest backup: %v\n", err))
 		return
 	}
-	fmt.Println(latestBackup)
-
+	Log.Info(latestBackup)
 	// 获取当前数据库文件的 MD5
 	currentMD5, err := getFileMD5(dbFile)
 	if err != nil {
-		fmt.Println("Error getting current DB MD5:", err)
+		Log.Error(fmt.Sprintf("Error getting current DB MD5: %v\n", err))
 		return
 	}
 
 	// 比较 MD5，如果一致，则不备份
 	if latestMD5 == currentMD5 {
-		fmt.Println("No changes in database, skipping backup.")
+		Log.Info("No changes in database, skipping backup.")
 		return
 	}
 
@@ -77,17 +76,17 @@ func BackupDatabase() {
 	backupFileName := fmt.Sprintf("%s/backup_%s.db", backupDir, time.Now().Format("2006-01-02_15-04-05"))
 	err = copyFile(dbFile, backupFileName)
 	if err != nil {
-		fmt.Println("Error creating backup:", err)
+		Log.Error(fmt.Sprintf("Error creating backup: %v\n", err))
 		return
 	}
 
 	// 保留最新的 15 个备份，删除其余的
 	err = pruneOldBackups(backupDir, maxBackups)
 	if err != nil {
-		fmt.Println("Error pruning old backups:", err)
+		Log.Error(fmt.Sprintf("Error pruning old backups: %v\n", err))
 		return
 	}
-	fmt.Println("Backup created:", backupFileName)
+	Log.Info(fmt.Sprintf("Backup created: %s\n", backupFileName))
 }
 
 // getFileMD5 计算文件的 MD5 值
@@ -106,7 +105,6 @@ func getFileMD5(filePath string) (string, error) {
 
 	hashInBytes := hash.Sum(nil)[:16]
 	md5String = fmt.Sprintf("%x", hashInBytes)
-
 	return md5String, nil
 }
 

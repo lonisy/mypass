@@ -6,6 +6,8 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"errors"
+	"fmt"
+	"strings"
 )
 
 func DefaultEncryptString(plainText string) string {
@@ -18,13 +20,22 @@ func DefaultDecryptString(plainText string) string {
 	return cipherText
 }
 
+func AdjustTo16Characters(input string) string {
+	targetLength := 16
+	if len(input) < targetLength {
+		padding := strings.Repeat("_", targetLength-len(input))
+		return input + padding
+	}
+	return input[:targetLength]
+}
+
 /// EncryptString 使用 AES 加密字符串
 func EncryptString(plainText, key string) (string, error) {
+	fmt.Println(plainText, key)
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "", err
 	}
-
 	plainTextBytes := []byte(plainText)
 	blockSize := block.BlockSize()
 	plainTextBytes = PKCS7Padding(plainTextBytes, blockSize)
@@ -36,21 +47,19 @@ func EncryptString(plainText, key string) (string, error) {
 
 // DecryptString 使用 AES 解密字符串
 func DecryptString(cipherText, key string) (string, error) {
+	fmt.Println(cipherText, key)
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "", err
 	}
-
 	cipherTextBytes, err := base64.StdEncoding.DecodeString(cipherText)
 	if err != nil {
 		return "", err
 	}
-
 	blockSize := block.BlockSize()
 	if len(cipherTextBytes) < blockSize {
 		return "", errors.New("cipherText too short")
 	}
-
 	mode := cipher.NewCBCDecrypter(block, []byte(key[:blockSize]))
 	mode.CryptBlocks(cipherTextBytes, cipherTextBytes)
 	cipherTextBytes = PKCS7UnPadding(cipherTextBytes)

@@ -11,8 +11,9 @@ func TestPasswd(t *testing.T) {
 	saf, _ := AAesEncrypt([]byte(myPasswd))
 	ron, _ := AAesDecrypt(saf)
 	fmt.Println(string(ron))
-	m, _ := EncryptString(myPasswd, "PfHRR48%sFhw8*K1")
+
+	m, _ := EncryptString(myPasswd, AdjustTo16Characters("asd..123"))
 	fmt.Println(m)
-	ss, _ := DecryptString(m, "PfHRR48%sFhw8*K1")
+	ss, _ := DecryptString(m, AdjustTo16Characters("asd..123"))
 	fmt.Println(ss)
 }

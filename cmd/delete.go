@@ -46,13 +46,12 @@ func init() {
 }
 
 func deletePassword() {
-	if ok, _ := checkFirstPasswordKey(); !ok {
+	if ok, _ := checkFirstPasswordKeyByScanInput(); !ok {
 		return
 	}
 	var id int
 	fmt.Print("Enter the ID of the password to delete: ")
 	fmt.Scanln(&id)
-
 	// 从数据库中搜索账号或URL
 	rows, err := app.Sqlite.DB().Query("SELECT id, account, password, url, email, note FROM passwords WHERE id = ?", id)
 	if err != nil {
@@ -68,12 +67,14 @@ func deletePassword() {
 		if err := rows.Scan(&item.ID, &item.Account, &item.Password, &item.URL, &item.Email, &item.Note); err != nil {
 			log.Fatal(err)
 		}
+		item.Password = "******"
 		items = append(items, item)
 		fmt.Printf("ID: %d, Account: %s, Password: %s, URL: %s, Email: %s, Note: %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
 	}
 
 	if !found {
-		fmt.Println("No matching records found.")
+		tools.ColorPrinter.Warning("No matching records found.")
+		app.Log.Error("No matching records found.")
 		return
 	}
 	tools.Output(items)

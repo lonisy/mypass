@@ -33,25 +33,16 @@ type PasswordItem struct {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "mypass",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+	Short: "",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if use_password_key {
+			var ok bool
+			if ok, password_key = checkFirstPasswordKeyByScanInput(); !ok {
+				return
+			}
+		}
 		listPasswords()
-		//red := color.New(color.FgRed).PrintfFunc()
-		//green := color.New(color.FgGreen).PrintfFunc()
-		//blue := color.New(color.FgBlue).PrintfFunc()
-		//
-		//// 使用颜色打印文本
-		//red("这是红色文本\n")
-		//green("这是绿色文本\n")
-		//blue("这是蓝色文本\n")
 	},
 }
 
@@ -64,40 +55,47 @@ func Execute() {
 	}
 }
 
+var password_key string
+var use_password_key bool
+
 func init() {
 	initializeDatabase()
 	checkAndSetFirstPasswordKey()
-
-	//fmt.Println(getPasswordKey())
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mypass.yaml)")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	rootCmd.PersistentFlags().BoolVarP(&use_password_key, "auth", "a", false, "Description of option A")
+	//rootCmd.PersistentFlags().StringVarP(&password_key, "auth", "a", "used", "password_key")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func checkFirstPasswordKey() (bool, string) {
-	fmt.Printf("Enter Password Key: ")
+func checkFirstPasswordKeyByScanInput() (bool, string) {
+	tools.ColorPrinter.Warning("Enter Password Key: ")
 	passwordBytes, err := gopass.GetPasswdMasked() // 显示星号
 	if err != nil {
 		fmt.Println("Error:", err)
 		return false, ""
 	}
 	password_key := string(passwordBytes)
-
 	//检查用户是否输入了密码键
-	//fmt.Println("Enter Password", password_key)
 	if strings.TrimSpace(password_key) == "" {
 		fmt.Println("No password key entered.")
 		return false, ""
 	}
 	//fmt.Println("\nPassword you entered is: ", password_key) // 注意：出于安全考虑，实际应用中不应打印密码
-
 	password_key_db, _ := getPasswordKey()
-	if tools.DefaultDecryptString(password_key_db) != strings.TrimSpace(password_key) {
-		log.Fatal("Password key is not correct!")
+	if password_key_db != strings.TrimSpace(password_key) {
+		tools.ColorPrinter.Danger("Password key is not correct!")
+		return false, ""
+	}
+	return true, password_key
+}
+
+func checkFirstPasswordKey(password_key string) (bool, string) {
+	password_key_db, err := getPasswordKey()
+	if err != nil {
+		app.Log.Error(err)
+		return false, ""
+	}
+	if password_key_db != strings.TrimSpace(password_key) {
+		tools.ColorPrinter.Info("Password key is not correct!")
 		return false, ""
 	}
 	return true, password_key
@@ -146,23 +144,37 @@ func createTableIfNotExists(tableName, createTableSQL string) {
 func listPasswords() {
 	rows, err := app.Sqlite.DB().Query("SELECT id, account, password, url, email, note, updated_at FROM passwords")
 	if err != nil {
-		log.Fatal(err)
+		app.Log.Fatal(err)
 	}
 	defer rows.Close()
-
 	items := make([]PasswordItem, 0)
 	for rows.Next() {
 		var item PasswordItem
 		if err := rows.Scan(&item.ID, &item.Account, &item.Password, &item.URL, &item.Email, &item.Note, &item.UpdatedAt); err != nil {
-			log.Fatal(err)
+			app.Log.Fatal(err)
+		}
+		if password_key == "" {
+			item.Password = "******"
+		} else {
+			fmt.Println("password_key:", password_key)
+			fmt.Println("item.Password:", item.Password)
+			fmt.Println(tools.AdjustTo16Characters(password_key))
+			item.Password, _ = tools.DecryptString(item.Password, tools.AdjustTo16Characters(password_key))
+			if err != nil {
+				app.Log.Error(err)
+			}
 		}
 		items = append(items, item)
-		//fmt.Printf("%d: %s - %s -%s - %s - %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
 	}
 	if err := rows.Err(); err != nil {
-		log.Fatal(err)
+		app.Log.Fatal(err)
 	}
-	tools.GreenOutput(items)
+	//tools.ColorPrinter.Info(password_key)
+	if len(items) == 0 {
+		tools.ColorPrinter.Info("No passwords found.")
+	} else {
+		tools.GreenOutput(items)
+	}
 }
 
 func checkAndSetFirstPasswordKey() {
@@ -211,5 +223,5 @@ func getPasswordKey() (string, error) {
 		}
 		return "", err
 	}
-	return passwordKey, nil
+	return tools.DefaultDecryptString(passwordKey), nil
 }

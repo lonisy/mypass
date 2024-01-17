@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"mypass/app"
+	"mypass/tools"
 	"time"
 )
 
@@ -29,22 +30,11 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func addPassword() {
 	//var password_key, account, password, url, email, note string
 	var account, password, url, email, note string
-
 	//fmt.Print("Enter Password Key: ")
 	//fmt.Scanln(&password_key)
 	// 获取用户输入
@@ -59,7 +49,9 @@ func addPassword() {
 	fmt.Print("Enter note: ")
 	fmt.Scanln(&note)
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
-
+	// 加密密码
+	password_key, _ = getPasswordKey()
+	password, _ = tools.EncryptString(password, tools.AdjustTo16Characters(password_key))
 	// 插入到数据库
 	statement, err := app.Sqlite.DB().Prepare("INSERT INTO passwords (account, password, url, email, note,updated_at,created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
