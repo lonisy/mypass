@@ -1,5 +1,5 @@
 TARGET_DIR:=$(abspath $(lastword ./))
-APP_NAME:=mypass
+APP_NAME:=mykey
 
 build:
 	@sh -c "go mod tidy"

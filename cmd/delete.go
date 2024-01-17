@@ -71,7 +71,6 @@ func deletePassword() {
 		items = append(items, item)
 		fmt.Printf("ID: %d, Account: %s, Password: %s, URL: %s, Email: %s, Note: %s\n", item.ID, item.Account, item.Password, item.URL, item.Email, item.Note)
 	}
-
 	if !found {
 		tools.ColorPrinter.Warning("No matching records found.")
 		app.Log.Error("No matching records found.")
