@@ -90,9 +90,10 @@ func changePassword() {
 	fmt.Scanln(&newNote)
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
 
-	// 加密新密码
-	password_key, _ = getPasswordKey()
-	newPassword, _ = tools.EncryptString(newPassword, tools.AdjustTo16Characters(password_key))
+	if newPassword != "" {
+		password_key, _ = getPasswordKey()
+		newPassword, _ = tools.EncryptString(newPassword, tools.AdjustTo16Characters(password_key))
+	}
 
 	// 在数据库中更新记录
 	statement, err := app.Sqlite.DB().Prepare("UPDATE passwords SET account = COALESCE(NULLIF(?, ''), account), password = COALESCE(NULLIF(?, ''), password), url = COALESCE(NULLIF(?, ''), url), email = COALESCE(NULLIF(?, ''), email), note = COALESCE(NULLIF(?, ''), note), updated_at = ? WHERE id = ?")
